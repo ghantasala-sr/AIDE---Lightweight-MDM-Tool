@@ -3,13 +3,39 @@ import React, { useState } from 'react';
 function UploadScreen({ onComplete }) {
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     setIsUploading(true);
-    // Simulate upload and profiling API call
-    setTimeout(() => {
+    try {
+      // For now we send an empty array or a sample to the profiler
+      // You can hook up a real CSV parser here later.
+      const samplePayload = [
+        {
+          column_name: "email",
+          source_table_name: "users",
+          sample_values: ["test@example.com", "user@domain.com"]
+        }
+      ];
+
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(samplePayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      onComplete({ sourceId: 'src_123', schema: data });
+    } catch (error) {
+      console.error("Failed to profile schema:", error);
+      alert("Error profiling schema. See console for details.");
+    } finally {
       setIsUploading(false);
-      onComplete({ sourceId: 'src_123', schema: 'mock_schema' });
-    }, 2000);
+    }
   };
 
   return (

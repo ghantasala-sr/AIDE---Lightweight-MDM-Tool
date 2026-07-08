@@ -12,7 +12,9 @@ import java.util.Map;
 public class OrchestratorController {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String pythonServiceUrl = "http://localhost:8000/profile-schema";
+    
+    @org.springframework.beans.factory.annotation.Value("${PYTHON_SERVICE_URL:http://localhost:8000/profile-schema}")
+    private String pythonServiceUrl;
 
     @PostMapping("/profile")
     public ResponseEntity<?> profileSchema(@RequestBody List<Map<String, Object>> columns) {
