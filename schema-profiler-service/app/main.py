@@ -27,7 +27,7 @@ _llm = None
 def get_llm():
     global _llm
     if _llm is None:
-        _llm = ChatAnthropic(model_name="claude-3-5-sonnet-20240620", max_tokens=1024, temperature=0.1)
+        _llm = ChatAnthropic(model_name="claude-sonnet-4-6", max_tokens=1024, temperature=0.1)
     return _llm
 
 @app.post("/profile-schema", response_model=List[ProfileResult])
