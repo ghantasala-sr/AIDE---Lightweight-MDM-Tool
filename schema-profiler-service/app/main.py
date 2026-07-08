@@ -16,16 +16,15 @@ class ProfileResult(BaseModel):
     is_candidate_match_key: bool
     reasoning: str
 
-from langchain_google_vertexai import VertexAI
+from langchain_anthropic import ChatAnthropic
 import json
 
-# We will initialize VertexAI inside the endpoint to avoid
-# module-level GCP Authentication errors during CI testing
+# We will initialize ChatAnthropic inside the endpoint
 _llm = None
 def get_llm():
     global _llm
     if _llm is None:
-        _llm = VertexAI(model_name="gemini-1.0-pro", max_output_tokens=1024, temperature=0.1)
+        _llm = ChatAnthropic(model_name="claude-3-5-sonnet-20240620", max_tokens=1024, temperature=0.1)
     return _llm
 
 @app.post("/profile-schema", response_model=List[ProfileResult])
@@ -53,9 +52,9 @@ Respond ONLY with a valid JSON ARRAY of objects matching exactly this schema for
 """
     try:
         llm = get_llm()
-        response_text = llm.invoke(prompt)
+        response_message = llm.invoke(prompt)
         # Basic cleanup in case LLM wraps in markdown
-        clean_text = response_text.replace('```json', '').replace('```', '').strip()
+        clean_text = response_message.content.replace('```json', '').replace('```', '').strip()
         data_list = json.loads(clean_text)
         
         results = []
