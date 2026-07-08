@@ -1,0 +1,60 @@
+name: AIDE CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          # cache: 'npm' # Uncomment when package-lock.json is present
+      - name: Install dependencies
+        run: echo "npm ci --legacy-peer-deps" # placeholder for actual frontend setup
+      - name: Build
+        run: echo "npm run build" # placeholder for actual frontend build
+        
+  build-orchestrator-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./orchestrator-api
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          # cache: maven # Uncomment when pom.xml is present
+      - name: Build with Maven
+        run: echo "mvn -B package --file pom.xml" # placeholder for actual java build
+        
+  build-schema-profiler-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./schema-profiler-service
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          echo "pip install -r requirements.txt" # placeholder for actual python setup
+      - name: Test with pytest
+        run: |
+          echo "pytest" # placeholder for actual python testing
