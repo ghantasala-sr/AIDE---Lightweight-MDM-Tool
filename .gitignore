@@ -1,23 +1,35 @@
-# Mac OS
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 .DS_Store
 
-# IDEs
-.idea/
-.vscode/
-*.swp
+# Environments
+.env
+.venv
+venv/
+venv312/
+ENV/
+env.bak/
+venv.bak/
 
-# Node / React
+# Frontend
 node_modules/
+frontend/node_modules/
 dist/
 build/
-.env
-.env.local
+.next/
+out/
+.nuxt/
+coverage/
+.vercel
+ocal
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
 .venv/
 env/
 
@@ -37,5 +49,4 @@ logs/
 # Secrets
 *.key
 *.pem
-*.json
 credentials.json

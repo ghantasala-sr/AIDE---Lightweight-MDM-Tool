@@ -19,8 +19,14 @@ class ProfileResult(BaseModel):
 from langchain_google_vertexai import VertexAI
 import json
 
-# Initialize the Gemini model via Vertex AI
-llm = VertexAI(model_name="gemini-1.5-pro-preview-0409", max_output_tokens=1024, temperature=0.1)
+# We will initialize VertexAI inside the endpoint to avoid
+# module-level GCP Authentication errors during CI testing
+_llm = None
+def get_llm():
+    global _llm
+    if _llm is None:
+        _llm = VertexAI(model_name="gemini-1.5-pro-preview-0409", max_output_tokens=1024, temperature=0.1)
+    return _llm
 
 @app.post("/profile-schema", response_model=List[ProfileResult])
 async def profile_schema(columns: List[ColumnData]):
@@ -43,6 +49,7 @@ Respond ONLY with a valid JSON object matching exactly this schema:
 }}
 """
         try:
+            llm = get_llm()
             response_text = llm.invoke(prompt)
             # Basic cleanup in case LLM wraps in markdown
             clean_text = response_text.replace('```json', '').replace('```', '').strip()
