@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
+from dotenv import load_dotenv
+
+load_dotenv() # Load variables from .env file
 
 app = FastAPI(title="AIDE Schema Profiler Service")
 
