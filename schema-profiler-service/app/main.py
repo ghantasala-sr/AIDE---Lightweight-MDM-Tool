@@ -25,7 +25,7 @@ _llm = None
 def get_llm():
     global _llm
     if _llm is None:
-        _llm = VertexAI(model_name="gemini-1.5-pro-preview-0409", max_output_tokens=1024, temperature=0.1)
+        _llm = VertexAI(model_name="gemini-1.5-flash-preview-0514", max_output_tokens=1024, temperature=0.1)
     return _llm
 
 @app.post("/profile-schema", response_model=List[ProfileResult])
