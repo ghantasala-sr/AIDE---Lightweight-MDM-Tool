@@ -1,0 +1,9 @@
+id,first_name,last_name,email_address,phone_number,company,jobTitle,status
+1001,John,Doe,j.doe@example.com,555-0192,Acme Corp,Manager,Active
+1002, Jane,Smith,jsmith@example.com,(555) 012-3456,Acme Corporation,Director,Inactive
+1003,Bob,Jones,bobjones123@gmail.com,5550199,NULL,dev,Active
+1004,Sarah,O'Connor,sarah.o@startup.io,555-0100,,CEO,Active
+1005,Michael,Scott,,+1-555-0155,Dunder Mifflin,Regional Manager,Active
+1006,william,gates,bill@microsoft.com,555-0111,Microsoft,Founder,
+1007,John, Doe,j.doe@example.com,555-0192,Acme Corp,Mgr,Active
+1008,Alice,Wonderland,alice@wonderland.co.uk,,Wonderland Inc.,,Active

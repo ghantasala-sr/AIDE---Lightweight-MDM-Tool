@@ -1,0 +1,9 @@
+CONTACT_ID,FNAME,LNAME,EMAIL,PHONE,ORGANIZATION,ROLE
+C-9001,John,Doe,j.doe@acmecorp.com,555-0192,Acme,Manager
+C-9002,Jane,Smith,,555-0123,Acme Corp.,Marketing Dir.
+C-9003,Robert,Jones,bobjones123@gmail.com,5550199,Freelance,Developer
+C-9004,Sara,Oconnor,sarah.o@startup.io,5550100,Startup IO,CEO
+C-9005,Mike,Scott,mscott@dundermifflin.com,555-0155,Dunder Mifflin,Branch Mgr
+C-9006,Bill,Gates,billg@microsoft.com,5550111,MSFT,Chairman
+C-9007,J.,Doe,j.doe@acmecorp.com,,Acme,Manager
+C-9008,Alice,Liddell,alice@wonderland.co.uk,555-0188,Wonderland,,
