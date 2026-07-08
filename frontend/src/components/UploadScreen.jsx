@@ -1,41 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import Papa from 'papaparse';
 
 function UploadScreen({ onComplete }) {
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const handleUpload = async () => {
-    setIsUploading(true);
-    try {
-      // For now we send an empty array or a sample to the profiler
-      // You can hook up a real CSV parser here later.
-      const samplePayload = [
-        {
-          column_name: "email",
-          source_table_name: "users",
-          sample_values: ["test@example.com", "user@domain.com"]
-        }
-      ];
-
-      const response = await fetch('/api/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(samplePayload),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      onComplete({ sourceId: 'src_123', schema: data });
-    } catch (error) {
-      console.error("Failed to profile schema:", error);
-      alert("Error profiling schema. See console for details.");
-    } finally {
-      setIsUploading(false);
+  const handleBoxClick = () => {
+    // Trigger the hidden file input
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const data = results.data;
+          const headers = results.meta.fields;
+          
+          if (!headers || headers.length === 0) {
+            throw new Error("No columns found in CSV.");
+          }
+
+          // Build the payload for the AI Profiler
+          // We need { column_name, source_table_name, sample_values }
+          const payload = headers.map(header => {
+            // Get up to 5 non-empty sample values for this column
+            const sampleValues = data
+              .map(row => row[header])
+              .filter(val => val !== null && val !== undefined && val !== "")
+              .slice(0, 5);
+
+            return {
+              column_name: header,
+              source_table_name: file.name.replace('.csv', ''),
+              sample_values: sampleValues
+            };
+          });
+
+          const response = await fetch('/api/profile', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            throw new Error(`API Error: ${response.statusText}`);
+          }
+
+          const schemaMapping = await response.json();
+          onComplete({ sourceId: file.name, schema: schemaMapping });
+        } catch (error) {
+          console.error("Failed to profile schema:", error);
+          alert("Error profiling schema: " + error.message);
+        } finally {
+          setIsUploading(false);
+        }
+      },
+      error: (error) => {
+        console.error("CSV Parse error:", error);
+        alert("Error parsing CSV.");
+        setIsUploading(false);
+      }
+    });
   };
 
   return (
@@ -45,6 +82,15 @@ function UploadScreen({ onComplete }) {
         Upload a CSV or connect a database. Our AI will automatically infer the schema, identify primary match keys, and propose a canonical mapping for identity resolution.
       </p>
 
+      {/* Hidden file input */}
+      <input 
+        type="file" 
+        accept=".csv" 
+        style={{ display: 'none' }} 
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+      />
+
       <div 
         className="glass-panel" 
         style={{ 
@@ -52,9 +98,10 @@ function UploadScreen({ onComplete }) {
           maxWidth: 600, 
           padding: '4rem 2rem', 
           borderStyle: 'dashed',
-          cursor: 'pointer'
+          cursor: isUploading ? 'wait' : 'pointer',
+          pointerEvents: isUploading ? 'none' : 'auto'
         }}
-        onClick={handleUpload}
+        onClick={handleBoxClick}
       >
         <div style={{ fontSize: '3rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>
           📁
