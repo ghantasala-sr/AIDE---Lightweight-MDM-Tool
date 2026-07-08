@@ -5,18 +5,18 @@ import Dashboard from './components/Dashboard';
 
 function App() {
   const [currentStep, setCurrentStep] = useState('upload'); // 'upload', 'review', 'dashboard'
-  const [sessionData, setSessionData] = useState(null);
+  const [sources, setSources] = useState([]);
 
   const renderStep = () => {
     switch (currentStep) {
       case 'upload':
-        return <UploadScreen onComplete={(data) => { setSessionData(data); setCurrentStep('review'); }} />;
+        return <UploadScreen onComplete={(data) => { setSources(prev => [...prev, data]); setCurrentStep('review'); }} />;
       case 'review':
-        return <MappingReview data={sessionData} onComplete={() => setCurrentStep('dashboard')} />;
+        return <MappingReview sources={sources} onComplete={() => setCurrentStep('dashboard')} onAddAnother={() => setCurrentStep('upload')} />;
       case 'dashboard':
         return <Dashboard />;
       default:
-        return <UploadScreen />;
+        return <UploadScreen onComplete={(data) => { setSources(prev => [...prev, data]); setCurrentStep('review'); }} />;
     }
   };
 

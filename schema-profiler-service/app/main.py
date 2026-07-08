@@ -30,40 +30,48 @@ def get_llm():
 
 @app.post("/profile-schema", response_model=List[ProfileResult])
 async def profile_schema(columns: List[ColumnData]):
-    results = []
-    for col in columns:
-        prompt = f"""
+    # Serialize columns payload to string
+    columns_json = json.dumps([c.model_dump() for c in columns])
+    
+    prompt = f"""
 You are an expert data mapping AI.
-Analyze this column from a source table and infer its semantic type for identity resolution.
-Table Name: {col.source_table_name}
-Column Name: {col.column_name}
-Sample Values: {', '.join(col.sample_values)}
+Analyze these columns from a source table and infer their semantic types for identity resolution.
 
-Respond ONLY with a valid JSON object matching exactly this schema:
-{{
-  "column": "{col.column_name}",
-  "inferred_semantic_type": "string (e.g. email, first_name, phone, company, etc)",
-  "confidence": 0.0 to 1.0,
-  "is_candidate_match_key": true/false,
-  "reasoning": "brief explanation"
-}}
+Columns Data:
+{columns_json}
+
+Respond ONLY with a valid JSON ARRAY of objects matching exactly this schema for each column:
+[
+  {{
+    "column": "column_name",
+    "inferred_semantic_type": "string (e.g. email, first_name, phone, company, etc)",
+    "confidence": 0.0 to 1.0,
+    "is_candidate_match_key": true/false,
+    "reasoning": "brief explanation"
+  }}
+]
 """
-        try:
-            llm = get_llm()
-            response_text = llm.invoke(prompt)
-            # Basic cleanup in case LLM wraps in markdown
-            clean_text = response_text.replace('```json', '').replace('```', '').strip()
-            data = json.loads(clean_text)
-            
+    try:
+        llm = get_llm()
+        response_text = llm.invoke(prompt)
+        # Basic cleanup in case LLM wraps in markdown
+        clean_text = response_text.replace('```json', '').replace('```', '').strip()
+        data_list = json.loads(clean_text)
+        
+        results = []
+        for data in data_list:
             results.append(ProfileResult(
-                column=data.get("column", col.column_name),
+                column=data.get("column", "unknown"),
                 inferred_semantic_type=data.get("inferred_semantic_type", "unknown"),
                 confidence=float(data.get("confidence", 0.5)),
                 is_candidate_match_key=bool(data.get("is_candidate_match_key", False)),
                 reasoning=data.get("reasoning", "Vertex AI inference")
             ))
-        except Exception as e:
-            # Fallback
+        return results
+    except Exception as e:
+        # Fallback
+        results = []
+        for col in columns:
             results.append(ProfileResult(
                 column=col.column_name,
                 inferred_semantic_type="unknown",
@@ -71,8 +79,7 @@ Respond ONLY with a valid JSON object matching exactly this schema:
                 is_candidate_match_key=False,
                 reasoning=f"Error calling LLM: {str(e)}"
             ))
-            
-    return results
+        return results
 
 @app.get("/health")
 async def health_check():
